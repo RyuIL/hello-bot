@@ -1,51 +1,45 @@
-package com.example.hellobot.Account;
+package com.example.hellobot.account;
 
+import com.example.hellobot.common.dataType.ActiveDto;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import java.nio.file.AccessDeniedException;
 
-@RestController
+
 @Slf4j
+@RestController
+@RequiredArgsConstructor
 @RequestMapping("/account")
 public class AccountController {
 
-    @GetMapping
-    String helloWorld() {
-        return "hello world..!";
+    private final AccountService accountService;
+
+    @PostMapping("/login")
+    @ApiOperation(value = "로그인", notes = "ip로 임시 로그인 구현")
+    AccountDto.Res login() {
+        return accountService.login();
     }
 
-    @GetMapping("/who")
-    String who() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String ip = request.getHeader("X-Forwarded-For");
+    @PutMapping("/name/{id}")
+    @ApiOperation(value = "이름 변경")
+    AccountDto.Res updateName(
+            @PathVariable("id") @ApiParam(value = "id") long id,
+            @RequestBody @ApiParam(value = "유저 이름") AccountDto.UpdateName userName
+    ) {
+        return accountService.updateName(id, userName.getName());
+    }
 
-        if (ip == null) {
-            ip = request.getHeader("Proxy-Client-IP");
-            log.info(">>>> Proxy-Client-IP : " + ip);
-        }
-        if (ip == null) {
-            ip = request.getHeader("WL-Proxy-Client-IP"); // 웹로직
-            log.info(">>>> WL-Proxy-Client-IP : " + ip);
-        }
-        if (ip == null) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-            log.info(">>>> HTTP_CLIENT_IP : " + ip);
-        }
-        if (ip == null) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-            log.info(">>>> HTTP_X_FORWARDED_FOR : " + ip);
-        }
-        if (ip == null) {
-            ip = request.getRemoteAddr();
-        }
-
-        System.out.println("ip");
-        System.out.println(ip);
-        return "success";
+    @PutMapping("/{id}/active")
+    @ApiOperation(value = "활성화 업데이트")
+    AccountDto.Res updateActive(
+            @PathVariable("id") @ApiParam(value = "id") long id,
+            @RequestBody @ApiParam(value = "유저 활성화 여부") ActiveDto active
+    ) throws AccessDeniedException {
+        accountService.checkAdmin(id);
+        return accountService.updateActive(id, active.getActive());
     }
 }
