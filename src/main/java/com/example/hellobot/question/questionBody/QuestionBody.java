@@ -2,6 +2,7 @@ package com.example.hellobot.question.questionBody;
 
 import com.example.hellobot.chatRoom.chatMessage.ChatMessage;
 import com.example.hellobot.chatRoom.chatMessage.SenderType;
+import com.example.hellobot.chatRoom.chatMessage.messageBody.ChatMessageBody;
 import com.example.hellobot.question.Question;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -52,14 +53,14 @@ public class QuestionBody {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-//    public ChatMessage toChatMessage(long userId){
-//        return ChatMessage.builder()
-//                .botId(this.question.getContents().getBot().getId())
-//                .chatMessageBody(this.chatMessageBody)
-//                .senderId(userId)
-//                .senderType(SenderType.BOT)
-//                .build();
-//    }
+    public ChatMessage toChatMessage(long userId, ChatMessageBody chatMessageBody){
+        return ChatMessage.builder()
+                .botId(this.question.getContents().getBot().getId())
+                .chatMessageBody(chatMessageBody)
+                .senderId(userId)
+                .senderType(SenderType.BOT)
+                .build();
+    }
 
     public QuestionBodyDto.Res toDto(){
         return QuestionBodyDto.Res.builder()
